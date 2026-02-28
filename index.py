@@ -1,61 +1,34 @@
 # -*- coding: utf-8 -*-
 
 import streamlit as st
-from src.st_util import load_csv
 
-import seaborn as sns
-import matplotlib.pyplot as plt
-import pandas as pd
+from core.page_registry import get_page_definitions
 
+st.set_page_config(page_title="Dashboard Index", page_icon="📊", layout="wide")
 
-plt.rcParams["figure.figsize"] = 8, 8
+st.title("📊 Dashboard Index")
+st.caption("Streamlitマルチページ構成のトップページ")
 
-st.set_page_config(layout="wide")
-
-st.title("TOP Page")
-st.write(
+st.markdown(
     """
-    time series plots: \n
-    simulation portfolio: \n
-    machine learning analysis: \n
-    """
+このアプリは、`pages/` 配下に機能単位でページを追加できる構成です。
+
+- **トップページ（この画面）**: 全体インデックス
+- **サブページ**: 1ページ1機能で拡張
+- **共通ロジック**: `core/` に配置
+"""
 )
-# if st.checkbox("Use Sample Data"):
-#     st.header("US Macroeconomic Data from FRED")
-#     st.json({
-#         "realgdp": "Real gross domestic product",
-#         "realcons": "Real personal consumption expenditures",
-#         "realinv" :"Real gross private domestic investment",
-#         "realgovt":"Real federal consumption expenditures & gross investment",
-#         "realdpi": "Real private disposable income",
-#         "cpi" :"Consumer price index",
-#         "m1": "M1 nominal money stock",
-#         "tbilrate": "3-monthtreasury bill",
-#         "unemp" :"Unemployment rate",
-#         "pop":"Population",
-#         "infl":"Inflation rate (cpi base)",
-#         "realint":"Real interest rate (tbilrate - infl)"
-#         })
-#     df = pd.concat([load_test_data()[1], load_test_data()[0]], axis=1)
-#     st.header("Currency Data (USDJPY and USDEUR) from FRED")
-#     df = get_indices(False)
-#     st.session_state["df"] = df
-# else:
-#     st.session_state["df"] = None
-st.markdown("### data outlook")
-df = load_csv()
 
-if df is not None:
-    st.dataframe(
-        df.style.set_properties(
-            **{"background-color": "yellow"}, subset=df.columns[0]
-        )
-    )
-    st.write("Pairplot first 5 columns")
-    st.pyplot(sns.pairplot(data=df.iloc[:, :5]))
-    st.write("Clustermap of correlation")
-    st.pyplot(
-        sns.clustermap(
-            df.corr().round(2), row_cluster=True, annot=True, center=0, figsize=(6, 6)
-        )
-    )
+st.subheader("ページ一覧")
+page_definitions = get_page_definitions()
+for page in page_definitions:
+    with st.container(border=True):
+        col1, col2 = st.columns([3, 1])
+        with col1:
+            st.markdown(f"### {page.title}")
+            st.write(page.description)
+            st.code(f"pages/{page.file_name}", language="bash")
+        with col2:
+            st.metric("Status", page.status)
+
+st.info("新しい機能ページを追加する場合は `pages/` に新しい `.py` ファイルを作成してください。")
